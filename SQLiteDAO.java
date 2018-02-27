@@ -26,50 +26,23 @@ public class SQLiteDAO implements MP3Dao {
 
 	@Override
 	public void insert(MP3 mp3) {
-		String sql = "insert into mp3 (name, author) VALUES (?, ?)";
+		String sql = "INSERT INTO mp3 (name, author) VALUES (?, ?)";
 		jdbcTemplate.update(sql, new Object[] { mp3.getName(), mp3.getAuthor() });
 	}
 
-	public void insertWithJDBC(MP3 mp3) {
-
-		Connection conn = null;
-
-		try {
-			Class.forName("org.sqlite.JDBC");
-			String url = "jdbc:sqlite:db/SpringDB.db";
-			conn = DriverManager.getConnection(url, "", "");
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		String sql = "insert into mp3 (name, author) VALUES (?, ?)";
-
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, mp3.getName());
-			ps.setString(2, mp3.getAuthor());
-			ps.executeUpdate();
-			ps.close();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
-		}
-	}
+	
 
 	@Override
 	public void delete(MP3 mp3) {
-		// TODO Auto-generated method stub
+		String sql = "DELETE FROM mp3 WHERE name = ? AND  author = ?";
+		jdbcTemplate.update(sql, new Object[] {mp3.getName(), mp3.getAuthor()});
 
+	}
+	
+	@Override
+	public void delete(int id) {
+		String sql = "DELETE FROM mp3 WHERE id = ? ";
+		int result = jdbcTemplate.update(sql,id);
 	}
 
 	@Override
@@ -89,6 +62,15 @@ public class SQLiteDAO implements MP3Dao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void insert(List<MP3> mp3) {
+		for(MP3 m: mp3)
+			insert(m);
+		
+	}
+
+	
 
 	
 	
