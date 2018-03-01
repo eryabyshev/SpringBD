@@ -4,15 +4,19 @@ package ru.evgeny.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import ru.evgeny.dao.interfaces.MP3Dao;
 import ru.evgeny.dao.obj.MP3;
@@ -28,12 +32,17 @@ public class SQLiteDAO implements MP3Dao {
 	}
 
 	@Override
-	public void insert(MP3 mp3) {
+	public int insert(MP3 mp3) {
+		
 		String sql = "INSERT INTO mp3 (name, author) VALUES (:name, :author)";
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 		parameterSource.addValue("name", mp3.getName());
 		parameterSource.addValue("author", mp3.getAuthor());
-		jdbcTemplate.update(sql, parameterSource);
+		
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		jdbcTemplate.update(sql, parameterSource,keyHolder);
+		
+		return keyHolder.getKey().intValue();
 	}
 
 	
@@ -105,5 +114,23 @@ public class SQLiteDAO implements MP3Dao {
 		String sql = "SELECT count(*) FROM mp3";
 	
 		return jdbcTemplate.getJdbcOperations().queryForObject(sql, Integer.class);
+	}
+
+	@Override
+	public Map<String, Integer> getStat() {
+		String sql = "SELECT author, count(*) as count FROM mp3 GROUP BY author";
+		
+		return jdbcTemplate.query(sql, new ResultSetExtractor<Map<String, Integer>>() {
+			@Override
+			public Map<String, Integer> extractData(ResultSet rs) throws SQLException{
+				Map<String, Integer> map = new TreeMap<>();
+				while(rs.next()) {
+					String author = rs.getString("author");
+					int count = rs.getInt("count");
+					map.put(author, count);
+				}
+			return map;
+			}
+		});
 	}
 }

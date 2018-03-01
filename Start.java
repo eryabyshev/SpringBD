@@ -15,8 +15,8 @@ public class Start {
 	public static void main(String[] args) {
 		MP3 mp3 = new MP3();
 		
-		mp3.setName("New Song1");
-		mp3.setAuthor("New Author2");
+		mp3.setAuthor("LCD Soundsystem"); 
+		mp3.setName("Tonite");
 		
 		ApplicationContext context = new ClassPathXmlApplicationContext("context.xml");
 		SQLiteDAO sqLiteDAO = (SQLiteDAO)context.getBean("sqliteDAO");
@@ -29,6 +29,11 @@ public class Start {
 		for(MP3 a : name) {
 			System.out.println(a.getName() + " \t " + a.getAuthor());
 		}
+		
+		System.out.println(sqLiteDAO.getStat());
+
+		
+		System.out.println(sqLiteDAO.insert(mp3));
 		
 
 	}
